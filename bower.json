@@ -1,6 +1,6 @@
 {
   "author": "Max Hubin",
-  "name": "angular-ui-mask-view",
+  "name": "angular-ui-mask-views",
   "homepage": "https://github.com/maximax123/ui-mask",
   "main": "./dist/mask.js",
   "license": "MIT",
