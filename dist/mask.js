@@ -1,7 +1,7 @@
 /*!
  * angular-ui-mask-view
  * https://github.com/angular-ui/ui-mask
- * Version: 2.0.1 - 2015-12-02T09:41:51.744Z
+ * Version: 2.0.2 - 2015-12-02T11:08:37.635Z
  * License: MIT
  */
 
@@ -43,8 +43,7 @@ angular.module('ui.mask', [])
                     originalPlaceholder = iAttrs.placeholder,
                     originalMaxlength = iAttrs.maxlength,
                   // Vars used exclusively in eventHandler()
-                    oldValue, oldValueUnmasked, oldCaretPosition, oldSelectionLength,
-                    removeCount=0;
+                    oldValue, oldValueUnmasked, oldCaretPosition, oldSelectionLength;
 
                   var originalIsEmpty = controller.$isEmpty;
                   controller.$isEmpty = function(value) {
@@ -226,6 +225,7 @@ angular.module('ui.mask', [])
                       iElement.unbind('keyup', eventHandler);
                       iElement.unbind('click', eventHandler);
                       iElement.unbind('focus', eventHandler);
+                      iElement.unbind('paste', pasteHandler);
                       eventsBound = false;
                   }
 
@@ -239,14 +239,9 @@ angular.module('ui.mask', [])
                         maskPatternsCopy = maskPatterns.slice();
                       // Preprocess by stripping mask components from value
                       value = value.toString();
-                      if (removeCount){
-                          removeCount=0;
-                      }else{
-                          angular.forEach(maskComponents, function(component) {
-                              value = value.replace(component, '');
-                          });
-                          removeCount++;
-                      }
+                      angular.forEach(maskComponents, function(component) {
+                          value = value.replace(component, '');
+                      });
                       angular.forEach(value.split(''), function(chr) {
                           if (maskPatternsCopy.length && maskPatternsCopy[0].test(chr)) {
                               valueUnmasked += chr;
@@ -418,7 +413,6 @@ angular.module('ui.mask', [])
                           return;
                       }
 
-                      removeCount=0;
                       var val = iElement.val(),
                         valOld = oldValue,
                         valMasked,
@@ -490,17 +484,17 @@ angular.module('ui.mask', [])
                       //actually doing anything.  Meaning, things like pristine and touched will be set.
                       if (valAltered) {
                           scope.$apply(function () {
-                              controller.$setViewValue(valUnmasked);
+                              controller.$setViewValue(maskComponents[0]+valUnmasked); // $setViewValue should be run in angular context, otherwise the changes will be invisible to angular and user code.
                           });
-                      }else{
-                          if (paste){
-                              paste=false;
-                              scope.$apply(function () {
-                                  controller.$setViewValue(valUnmasked);
-                              });
+                      }else {
+                          if ( paste ) {
+                              paste = false;
+                              scope.$apply ( function () {
+                                  controller.$setViewValue ( maskComponents[ 0 ] + valUnmasked );
+                              } );
                           }
-
                       }
+
                       // Caret Repositioning
                       // ===================
 
