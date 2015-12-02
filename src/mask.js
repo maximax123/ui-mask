@@ -201,6 +201,7 @@ angular.module('ui.mask', [])
                       iElement.bind('blur', blurHandler);
                       iElement.bind('mousedown mouseup', mouseDownUpHandler);
                       iElement.bind(linkOptions.eventsToHandle.join(' '), eventHandler);
+                      iElement.bind('paste', pasteHandler);
                       eventsBound = true;
                   }
 
@@ -391,6 +392,10 @@ angular.module('ui.mask', [])
                       iElement.unbind('mouseout', mouseoutHandler);
                   }
 
+                  var paste=false;
+                  function pasteHandler(){
+                      paste=true;
+                  }
                   function eventHandler(e) {
                       /*jshint validthis: true */
                       e = e || {};
@@ -475,10 +480,17 @@ angular.module('ui.mask', [])
                       //actually doing anything.  Meaning, things like pristine and touched will be set.
                       if (valAltered) {
                           scope.$apply(function () {
-                              controller.$setViewValue(valUnmasked); // $setViewValue should be run in angular context, otherwise the changes will be invisible to angular and user code.
+                              controller.$setViewValue(valUnmasked);
                           });
-                      }
+                      }else{
+                          if (paste){
+                              paste=false;
+                              scope.$apply(function () {
+                                  controller.$setViewValue(valUnmasked);
+                              });
+                          }
 
+                      }
                       // Caret Repositioning
                       // ===================
 
